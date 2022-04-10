@@ -36,6 +36,8 @@ class renderer:
     def render():
         # Import obj from the path given
         bpy.ops.import_scene.obj(filepath=sys.argv[-1])
+        save_path = sys.argv[5] # 'Save path is: '+sys.argv[5]
+        print(save_path)
 
         # Remove cube
 
@@ -62,14 +64,15 @@ class renderer:
             cam.rotation_euler[2] = pi/2+alpha
             cam.location.x = t_loc_x+cos(alpha)*dist
             cam.location.y = t_loc_y+sin(alpha)*dist
-            file = f'/home/elidor/Videos/renders/{x}'
+            # file = f'/home/elidor/Videos/renders/{x}'
+            file = f'{save_path}/{x}'
             bpy.context.scene.render.filepath = file
             bpy.ops.render.render( write_still=True ) 
 
 
 
-# render = renderer
+render = renderer
 
-# # Enable CUDA accelerated rendering
-# render.enable_gpus('CUDA')
-# render.render()
+# Enable CUDA accelerated rendering
+render.enable_gpus('CUDA')
+render.render()
