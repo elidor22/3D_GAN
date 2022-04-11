@@ -22,5 +22,6 @@ def paths_to_csv(path):
     df = pd.DataFrame(paths_dict)
     df.to_csv('paths.csv', index=False)
 
-path = '/media/elidor/CC98A71E98A70654/Ubuntu/3D_Data/02691156' 
+# path = '/media/elidor/CC98A71E98A70654/Ubuntu/3D_Data/02691156' 
+path = '/media/elidor/CC98A71E98A70654/Ubuntu/3D_Data/test' 
 paths_to_csv(path)
