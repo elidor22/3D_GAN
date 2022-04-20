@@ -5,6 +5,8 @@ from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 from dataloader import CustomDataset
 from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 
@@ -26,5 +28,8 @@ train_dataloader = DataLoader(train_dataset, batch_size=128 ,shuffle=True, num_w
 
 loop = tqdm(enumerate(train_dataloader),total = len(train_dataloader))
 
+
+
+# Train loop here
 for batch_idx, (data, features) in loop:
-    print(data.size(), features.size())
+    tqdm.write(data.size(), file = None)
