@@ -30,7 +30,7 @@ class CustomDataset(Dataset):
         model_path = root_path+'/models/model_normalized.obj' # The following string part of path is always teh same for the whole dataset
 
         # Load and transform image 
-        print(img_path)
+        # print(img_path)
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 

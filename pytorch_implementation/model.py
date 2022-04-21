@@ -5,7 +5,7 @@ from dataloader import CustomDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.nn.functional as F
-from model_blocks import conv_utils, ResidualBlock
+from model_blocks import conv, deconv, ResidualBlock
 
 
 class CycleGenerator(nn.Module):
@@ -14,10 +14,9 @@ class CycleGenerator(nn.Module):
         super(CycleGenerator, self).__init__()
 
         # 1. Define the encoder part of the generator
-        conv_class = conv_utils
-        self.conv1 = conv_class.conv(3, conv_dim, 4)
-        self.conv2 = conv_class.conv(conv_dim, conv_dim*2, 4)
-        self.conv3 = conv_class.conv(conv_dim*2, conv_dim*4, 4)
+        self.conv1 = conv(3, conv_dim, 4)
+        self.conv2 = conv(conv_dim, conv_dim*2, 4)
+        self.conv3 =conv(conv_dim*2, conv_dim*4, 4)
 
         # 2. Define the resnet part of the generator
         layers = []
@@ -28,9 +27,8 @@ class CycleGenerator(nn.Module):
 
 
         # 3. Define the decoder part of the generator
-        deconv = conv_utils.deconv
-        self.deconv1 = conv_class.deconv(conv_dim*4, conv_dim*2, 4)
-        self.deconv2 = conv_class.deconv(conv_dim*2, conv_dim, 4)
+        self.deconv1 = deconv(conv_dim*4, conv_dim*2, 4)
+        self.deconv2 = deconv(conv_dim*2, conv_dim, 4)
         # no batch norm on last layer
         self.deconv3 = deconv(conv_dim, 3, 4, batch_norm=False)
 
@@ -40,9 +38,10 @@ class CycleGenerator(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
+        print(x.size())
 
         x = self.res_blocks(x)
-
+        
         x = F.relu(self.deconv1(x))
         x = F.relu(self.deconv2(x))
         x = F.relu(self.deconv3(x))

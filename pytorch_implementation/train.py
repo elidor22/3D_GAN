@@ -7,7 +7,7 @@ from dataloader import CustomDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.nn.functional as F
-
+from model import CycleGenerator
 
 
 data_transform = A.Compose(
@@ -32,6 +32,9 @@ loop = tqdm(enumerate(train_dataloader),total = len(train_dataloader))
 idx, nxt = next(iter(loop))
 print(nxt[0].size())
 print(nxt[1].size())
+gen = CycleGenerator()
+res = gen(nxt[0])
+print(res.size())
 
 # Train loop here
 # for batch_idx, (data, features) in loop:
