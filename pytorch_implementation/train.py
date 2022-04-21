@@ -24,12 +24,16 @@ print(cwd)
 csv_path = cwd +'/paths.csv'
 
 train_dataset = CustomDataset(csv_path=csv_path, transform=data_transform)
-train_dataloader = DataLoader(train_dataset, batch_size=128 ,shuffle=True, num_workers=6)
+train_dataloader = DataLoader(train_dataset, batch_size=1 ,shuffle=True, num_workers=6)
 
 loop = tqdm(enumerate(train_dataloader),total = len(train_dataloader))
 
-
+# Next returns index, image and pointcloud
+idx, nxt = next(iter(loop))
+print(nxt[0].size())
+print(nxt[1].size())
 
 # Train loop here
-for batch_idx, (data, features) in loop:
-    tqdm.write(data.size(), file = None)
+# for batch_idx, (data, features) in loop:
+#     tqdm.write(str(data.size()), file = None)
+#     break
