@@ -1,6 +1,6 @@
 import os
-
-
+import torch
+import numpy as np
 from dataloader import CustomDataset
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -32,7 +32,32 @@ class CycleGenerator(nn.Module):
         # no batch norm on last layer
         self.deconv3 = deconv(conv_dim, 3, 4, batch_norm=False)
 
-    def forward(self, x):
+        # Pointcloud support block
+        fc_input_dims = self.calculate_conv_output_dims([3,224,224])
+        self.flatten = nn.Flatten()
+
+        # Linear layers output is the same as pointcloud output 1,5000,3
+        self.fc1 = nn.Linear(fc_input_dims, 1000)
+        self.fc2 = nn.Linear(1000, 5000) 
+        self.fc3 = nn.Linear(5000, 15000)
+
+
+
+    def calculate_conv_output_dims(self, input_dims):
+        state = torch.zeros(1, *input_dims)
+        dims = self.conv1(state)
+        dims = self.conv2(dims)
+        dims = self.conv3(dims)
+
+        dims = self.res_blocks(dims)
+        
+        dims = F.relu(self.deconv1(dims))
+        dims = F.relu(self.deconv2(dims))
+        dims = F.relu(self.deconv3(dims))
+        # print(int(np.prod(dims.size())))
+        return int(np.prod(dims.size()))
+
+    def forward(self, x, batch_size):
         """Given an image x, returns a transformed image."""
         # define feedforward behavior, applying activations as necessary
         x = F.relu(self.conv1(x))
@@ -45,6 +70,16 @@ class CycleGenerator(nn.Module):
         x = F.relu(self.deconv1(x))
         x = F.relu(self.deconv2(x))
         x = F.relu(self.deconv3(x))
+
+        # Get the forward prop result and return the reshaped version
+        x = self.flatten(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        print(x.size())
+
+        # Reshape as batch size + pointcloud shape[5000,3]
+        x = torch.reshape(x, [batch_size,5000,3])
 
         return x
 

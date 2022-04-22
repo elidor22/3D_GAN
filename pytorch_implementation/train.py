@@ -23,8 +23,10 @@ cwd = os.getcwd()
 print(cwd)
 csv_path = cwd +'/paths.csv'
 
+batch_size = 5
+
 train_dataset = CustomDataset(csv_path=csv_path, transform=data_transform)
-train_dataloader = DataLoader(train_dataset, batch_size=1 ,shuffle=True, num_workers=6)
+train_dataloader = DataLoader(train_dataset, batch_size=batch_size ,shuffle=True, num_workers=6)
 
 loop = tqdm(enumerate(train_dataloader),total = len(train_dataloader))
 
@@ -33,7 +35,7 @@ idx, nxt = next(iter(loop))
 print(nxt[0].size())
 print(nxt[1].size())
 gen = CycleGenerator()
-res = gen(nxt[0])
+res = gen(nxt[0], batch_size)
 print(res.size())
 
 # Train loop here
