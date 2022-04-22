@@ -63,7 +63,7 @@ class CycleGenerator(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
-        print(x.size())
+        # print(x.size())
 
         x = self.res_blocks(x)
         
@@ -76,10 +76,10 @@ class CycleGenerator(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        print(x.size())
+        # print(x.size())
 
         # Reshape as batch size + pointcloud shape[5000,3]
-        x = torch.reshape(x, [batch_size,5000,3])
+        x = torch.reshape(x, [batch_size,1,5000,3])
 
         return x
 
