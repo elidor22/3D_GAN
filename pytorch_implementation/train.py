@@ -45,29 +45,60 @@ device = 'cpu'
 model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 criterion = chamfer_distance
+criterion_mse = nn.MSELoss()
 # Train loop here
 
-epoch = 1
-with tqdm(loop, unit="batch") as tepoch:
-        epoch_loss = 0.0
-        batch_nr = 1
-        for batch_idx, (image, point_cloud) in tepoch:
-            tepoch.set_description(f"Epoch {epoch}")
-            image, point_cloud = image.to(device), point_cloud.to(device)
+train_loop = tqdm(enumerate(train_dataloader),total = len(train_dataloader))
+def train_step(epoch):
+    with tqdm(train_loop, unit="batch") as tepoch:
+            epoch_loss = 0.0
+            batch_nr = 1
+            for batch_idx, (image, point_cloud) in tepoch:
+                tepoch.set_description(f"Epoch {epoch}")
+                image, point_cloud = image.to(device), point_cloud.to(device)
+                # print(point_cloud.size())
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+                # zero the parameter gradients
+                optimizer.zero_grad()
 
-            res = model(image, batch_size)
-            print(res.size(), point_cloud.size())
-            loss, _ = chamfer_distance(res, point_cloud)
+                res = model(image, batch_size)
+                # print(res[0].size(), point_cloud.size())
+                
 
-            loss.backward()
-            optimizer.step()
+                # Calculate loss per elements as chamfer loss from Pytorch3d doesn't support batches
+                loss_cmph = 0 
+                for i in range(batch_size):
+                    # res = model(image, batch_size)
+                    loss_chamfer, _ = criterion(res[i], point_cloud[i])
+                    
+                    loss_cmph += loss_chamfer
+                    # loss_mse = criterion_mse(res, point_cloud)
+                    # loss_mse_accumulated += loss_mse
 
-            epoch_loss += res.shape[0]*loss.item()
-            tepoch.set_postfix(loss=loss.item(), epoch_loss_status = epoch_loss/batch_nr)
-            batch_nr += 1
-            break
+                
+
+                loss_chamfer = loss_cmph/batch_size
+                loss_mse = loss_mse = criterion_mse(res, point_cloud)
+
+                # Sum mse loss with chamfer
+                loss_ls = [loss_chamfer, loss_mse]
+                loss = sum(loss_ls)
+                # print(loss)
+
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += res.shape[0]*loss.item()
+                tepoch.set_postfix(loss=loss.item(), epoch_loss_status = epoch_loss/batch_nr)
+                batch_nr += 1
+
+                # Save model
+                # torch.save(model.state_dict(), f'model_archive/model_epoch{epoch}.pth')
+                # break
+            torch.save(model.state_dict(), f'model_archive/model_epoch{epoch}.pth')
 
 
+
+epochs = 1
+for t in range(epochs):
+    train_step(t)

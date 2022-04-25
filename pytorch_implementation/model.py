@@ -80,7 +80,7 @@ class CycleGenerator(nn.Module):
 
         # Reshape as batch size + pointcloud shape[5000,3]
         x = torch.reshape(x, [batch_size,1,5000,3])
-
+        # x = torch.reshape(x, [1,5000,3])
         return x
 
     
